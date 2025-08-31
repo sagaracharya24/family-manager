@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:our_home/presentation/bloc/auth/auth_event.dart';
+import 'package:our_home/presentation/bloc/auth/auth_state.dart';
 
 import '../../core/di/injection_container.dart';
 import '../bloc/auth/auth_bloc.dart';
@@ -9,11 +11,11 @@ import '../bloc/user_management/user_management_bloc.dart';
 import '../pages/admin/admin_dashboard_page.dart';
 import '../pages/archive/archive_page.dart';
 import '../pages/auth/login_page.dart';
+import '../pages/auth/otp_verification_page.dart';
 import '../pages/barcode/barcode_generator_page.dart';
 import '../pages/family/family_members_page.dart';
 import '../pages/home/home_page.dart';
 import '../pages/scanning/scan_page.dart';
-import '../pages/auth/otp_verification_page.dart';
 
 class AppRoutes {
   static const String login = '/';
@@ -226,22 +228,66 @@ class BiometricAuthPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ).animate().fadeIn(delay: 400.ms),
                 const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: () {
-                    // TODO: Trigger biometric authentication
+                BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, state) {
+                    return Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: state is AuthLoading
+                              ? null
+                              : () {
+                                  context
+                                      .read<AuthBloc>()
+                                      .add(BiometricAuthRequested());
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF667eea),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: state is AuthLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Text(
+                                  'Authenticate with Biometrics',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: state is AuthLoading
+                              ? null
+                              : () {
+                                  if (state is BiometricAuthRequired) {
+                                    context
+                                        .read<AuthBloc>()
+                                        .add(AuthCheckRequested());
+                                    Navigator.pushReplacementNamed(
+                                        context, '/home');
+                                  }
+                                },
+                          child: const Text(
+                            'Skip Biometric Authentication',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF667eea),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Authenticate',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
                 ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.2),
               ],
             ),
