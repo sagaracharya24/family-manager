@@ -31,13 +31,66 @@ class _FamilyMembersPageState extends State<FamilyMembersPage> {
           ),
         ],
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: 5, // TODO: Replace with actual data
-        itemBuilder: (context, index) {
-          return _buildMemberCard(index);
-        },
-      ),
+      body: _buildFamilyMembersList(),
+    );
+  }
+
+  Widget _buildFamilyMembersList() {
+    // TODO: Replace with BlocBuilder for real family members data
+    final List<dynamic> familyMembers = []; // This should come from bloc state
+    
+    if (familyMembers.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.family_restroom,
+              size: 80,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No Family Members',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Add members to join the family',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade500,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _showAddMemberDialog,
+              icon: const Icon(Icons.add),
+              label: const Text('Add Family Member'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF667eea),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: familyMembers.length,
+      itemBuilder: (context, index) {
+        return _buildMemberCard(index);
+      },
     );
   }
 

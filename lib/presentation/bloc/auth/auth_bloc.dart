@@ -167,10 +167,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     BiometricAuthSkipped event,
     Emitter<AuthState> emit,
   ) async {
-    if (state is! BiometricAuthRequired) return;
+    print('Current state: ${state.runtimeType}');
     
-    final user = (state as BiometricAuthRequired).user;
-    emit(AuthAuthenticated(user));
+    // Get user from current auth user since we're authenticated
+    final result = await _authRepository.getCurrentUser();
+    
+    result.fold(
+      (failure) => emit(AuthError(failure.toString())),
+      (user) {
+        if (user != null) {
+          emit(AuthAuthenticated(user));
+        } else {
+          emit(AuthUnauthenticated());
+        }
+      },
+    );
   }
 
   Future<void> _onSignOutRequested(
