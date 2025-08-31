@@ -18,6 +18,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _phoneController = TextEditingController();
   bool _isPhoneLogin = false;
+  bool _isSuperAdmin = false;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,11 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            Navigator.pushReplacementNamed(context, '/home');
+            if (state.user.role == 'super_admin') {
+              Navigator.pushReplacementNamed(context, '/admin');
+            } else {
+              Navigator.pushReplacementNamed(context, '/home');
+            }
           } else if (state is AuthPendingApproval) {
             Navigator.pushReplacementNamed(context, '/pending-approval');
           } else if (state is BiometricAuthRequired) {
@@ -61,6 +66,8 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   _buildLogo(),
                   const SizedBox(height: 48),
+                  _buildRoleSelection(),
+                  const SizedBox(height: 24),
                   _buildLoginForm(),
                   const SizedBox(height: 24),
                   _buildToggleButton(),
@@ -140,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                       ? null
                       : () {
                           context.read<AuthBloc>().add(
-                                PhoneSignInRequested(_phoneController.text),
+                                PhoneSignInRequested(_phoneController.text, _isSuperAdmin),
                               );
                         },
                   isLoading: state is AuthLoading,
@@ -155,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: state is AuthLoading
                       ? null
                       : () {
-                          context.read<AuthBloc>().add(GoogleSignInRequested());
+                          context.read<AuthBloc>().add(GoogleSignInRequested(_isSuperAdmin));
                         },
                   isLoading: state is AuthLoading,
                   child: const Row(
@@ -192,6 +199,79 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     ).animate().fadeIn(delay: 400.ms);
+  }
+
+  Widget _buildRoleSelection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Select Role',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF667eea),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Radio<bool>(
+                value: false,
+                groupValue: _isSuperAdmin,
+                onChanged: (value) {
+                  setState(() {
+                    _isSuperAdmin = value!;
+                  });
+                },
+                activeColor: const Color(0xFF667eea),
+              ),
+              const Text(
+                'Family Member',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Radio<bool>(
+                value: true,
+                groupValue: _isSuperAdmin,
+                onChanged: (value) {
+                  setState(() {
+                    _isSuperAdmin = value!;
+                  });
+                },
+                activeColor: const Color(0xFF667eea),
+              ),
+              const Text(
+                'Super Admin',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ).animate().slideY(begin: 0.2, duration: 500.ms).fadeIn();
   }
 
   void _showErrorDialog(BuildContext context, String message) {

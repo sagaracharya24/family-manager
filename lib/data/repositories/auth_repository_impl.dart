@@ -25,7 +25,7 @@ class AuthRepositoryImpl implements AuthRepository {
   ) : _localAuth = LocalAuthentication();
 
   @override
-  Future<Either<Failure, UserEntity>> signInWithGoogle() async {
+  Future<Either<Failure, UserEntity>> signInWithGoogle({bool isSuperAdmin = false}) async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
@@ -46,20 +46,16 @@ class AuthRepositoryImpl implements AuthRepository {
         return const Left(AuthenticationFailure('Failed to sign in with Google'));
       }
 
-      // Check if this is the first user (bootstrap super admin)
-      final usersQuery = await _firestore.collection(AppConstants.usersCollection).limit(1).get();
-      final isFirstUser = usersQuery.docs.isEmpty;
-
       final userEntity = UserModel(
         id: user.uid,
         email: user.email ?? '',
         displayName: user.displayName,
         photoUrl: user.photoURL,
         phoneNumber: user.phoneNumber,
-        role: isFirstUser ? AppConstants.roleSuperAdmin : AppConstants.roleFamilyMember,
-        status: isFirstUser ? AppConstants.userStatusApproved : AppConstants.userStatusPending,
+        role: isSuperAdmin ? AppConstants.roleSuperAdmin : AppConstants.roleFamilyMember,
+        status: isSuperAdmin ? AppConstants.userStatusApproved : AppConstants.userStatusPending,
         createdAt: DateTime.now(),
-        permissions: isFirstUser ? [
+        permissions: isSuperAdmin ? [
           AppConstants.permissionCreateFamily,
           AppConstants.permissionManageMembers,
           AppConstants.permissionScanImages,
@@ -81,10 +77,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   String? _verificationId;
+  bool _pendingPhoneIsSuperAdmin = false;
   
   @override
-  Future<Either<Failure, UserEntity>> signInWithPhoneNumber(String phoneNumber) async {
+  Future<Either<Failure, UserEntity>> signInWithPhoneNumber(String phoneNumber, {bool isSuperAdmin = false}) async {
     try {
+      _pendingPhoneIsSuperAdmin = isSuperAdmin;
       await _firebaseAuth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         verificationCompleted: (PhoneAuthCredential credential) async {
@@ -129,20 +127,16 @@ class AuthRepositoryImpl implements AuthRepository {
         return Left(AuthenticationFailure('Failed to sign in with phone number'));
       }
 
-      // Check if this is the first user (bootstrap super admin)
-      final usersQuery = await _firestore.collection(AppConstants.usersCollection).limit(1).get();
-      final isFirstUser = usersQuery.docs.isEmpty;
-
       final userEntity = UserModel(
         id: user.uid,
         email: user.email ?? '',
         displayName: user.displayName ?? 'Phone User',
         photoUrl: user.photoURL,
         phoneNumber: user.phoneNumber,
-        role: isFirstUser ? AppConstants.roleSuperAdmin : AppConstants.roleFamilyMember,
-        status: isFirstUser ? AppConstants.userStatusApproved : AppConstants.userStatusPending,
+        role: _pendingPhoneIsSuperAdmin ? AppConstants.roleSuperAdmin : AppConstants.roleFamilyMember,
+        status: _pendingPhoneIsSuperAdmin ? AppConstants.userStatusApproved : AppConstants.userStatusPending,
         createdAt: DateTime.now(),
-        permissions: isFirstUser ? [
+        permissions: _pendingPhoneIsSuperAdmin ? [
           AppConstants.permissionCreateFamily,
           AppConstants.permissionManageMembers,
           AppConstants.permissionScanImages,
@@ -223,10 +217,16 @@ class AuthRepositoryImpl implements AuthRepository {
         displayName: user.displayName,
         photoUrl: user.photoURL,
         phoneNumber: user.phoneNumber,
-        role: AppConstants.roleFamilyMember,
-        status: AppConstants.userStatusPending,
+        role: _pendingPhoneIsSuperAdmin ? AppConstants.roleSuperAdmin : AppConstants.roleFamilyMember,
+        status: _pendingPhoneIsSuperAdmin ? AppConstants.userStatusApproved : AppConstants.userStatusPending,
         createdAt: DateTime.now(),
-        permissions: [],
+        permissions: _pendingPhoneIsSuperAdmin ? [
+          AppConstants.permissionCreateFamily,
+          AppConstants.permissionManageMembers,
+          AppConstants.permissionScanImages,
+          AppConstants.permissionViewReports,
+          AppConstants.permissionExportData,
+        ] : [],
       );
 
       return Right(userEntity);
