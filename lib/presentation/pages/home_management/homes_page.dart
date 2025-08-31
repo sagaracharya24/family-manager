@@ -27,15 +27,28 @@ class _HomesPageState extends State<HomesPage> {
   void initState() {
     super.initState();
     final authState = context.read<AuthBloc>().state;
+    print('HomesPage initState - Auth state: ${authState.runtimeType}');
     if (authState is AuthAuthenticated) {
+      print('User is authenticated: ${authState.user.id}');
       context.read<HomeBloc>().add(LoadUserHomes(adminId: authState.user.id));
+    } else {
+      print('User is not authenticated: $authState');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        print('HomesPage AuthBloc state changed: ${state.runtimeType}');
+        if (state is AuthAuthenticated) {
+          context.read<HomeBloc>().add(LoadUserHomes(adminId: state.user.id));
+        } else if (state is AuthUnauthenticated) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
         title: const Text('My Homes'),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -70,6 +83,7 @@ class _HomesPageState extends State<HomesPage> {
         backgroundColor: const Color(0xFF667eea),
         foregroundColor: Colors.white,
       ),
+    ),
     );
   }
 

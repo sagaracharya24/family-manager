@@ -1,0 +1,6 @@
+#include "Generated.xcconfig"
+
+FLUTTER_FLAVOR=dev
+FLUTTER_DART_ENVIRONMENT=dev
+PRODUCT_BUNDLE_IDENTIFIER=com.ourhome.familymanager.dev
+PRODUCT_NAME=OurHome Dev
