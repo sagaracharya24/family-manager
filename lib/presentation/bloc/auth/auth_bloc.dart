@@ -28,6 +28,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<GoogleSignInRequested>(_onGoogleSignInRequested);
     on<PhoneSignInRequested>(_onPhoneSignInRequested);
+    on<PhoneVerificationRequested>(_onPhoneVerificationRequested);
     on<BiometricAuthRequested>(_onBiometricAuthRequested);
     on<SignOutRequested>(_onSignOutRequested);
     on<UserApprovalStatusChanged>(_onUserApprovalStatusChanged);
@@ -88,6 +89,34 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     
     final result = await _signInWithPhone(SignInWithPhoneParams(phoneNumber: event.phoneNumber));
+    
+    result.fold(
+      (failure) {
+        if (failure.toString().contains('VERIFICATION_CODE_SENT')) {
+          emit(PhoneVerificationCodeSent(event.phoneNumber));
+        } else {
+          emit(AuthError(failure.toString()));
+        }
+      },
+      (user) {
+        if (user.status == AppConstants.userStatusPending) {
+          emit(AuthPendingApproval(user));
+        } else if (user.status == AppConstants.userStatusApproved) {
+          emit(BiometricAuthRequired(user));
+        } else {
+          emit(AuthRejected('Your account has been rejected'));
+        }
+      },
+    );
+  }
+
+  Future<void> _onPhoneVerificationRequested(
+    PhoneVerificationRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    
+    final result = await _authRepository.verifyPhoneNumber(event.verificationCode);
     
     result.fold(
       (failure) => emit(AuthError(failure.toString())),

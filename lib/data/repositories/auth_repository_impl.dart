@@ -46,16 +46,26 @@ class AuthRepositoryImpl implements AuthRepository {
         return const Left(AuthenticationFailure('Failed to sign in with Google'));
       }
 
+      // Check if this is the first user (bootstrap super admin)
+      final usersQuery = await _firestore.collection(AppConstants.usersCollection).limit(1).get();
+      final isFirstUser = usersQuery.docs.isEmpty;
+
       final userEntity = UserModel(
         id: user.uid,
         email: user.email ?? '',
         displayName: user.displayName,
         photoUrl: user.photoURL,
         phoneNumber: user.phoneNumber,
-        role: AppConstants.roleFamilyMember,
-        status: AppConstants.userStatusPending,
+        role: isFirstUser ? AppConstants.roleSuperAdmin : AppConstants.roleFamilyMember,
+        status: isFirstUser ? AppConstants.userStatusApproved : AppConstants.userStatusPending,
         createdAt: DateTime.now(),
-        permissions: [],
+        permissions: isFirstUser ? [
+          AppConstants.permissionCreateFamily,
+          AppConstants.permissionManageMembers,
+          AppConstants.permissionScanImages,
+          AppConstants.permissionViewReports,
+          AppConstants.permissionExportData,
+        ] : [],
       );
 
       // Save user to Firestore
@@ -70,22 +80,84 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  String? _verificationId;
+  
   @override
   Future<Either<Failure, UserEntity>> signInWithPhoneNumber(String phoneNumber) async {
     try {
-      // Note: Phone verification is a two-step process
-      // This would need to be implemented with verification code flow
-      throw UnimplementedError('Phone verification needs verification code flow');
+      await _firebaseAuth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          // Auto-verification (happens on some devices)
+          await _firebaseAuth.signInWithCredential(credential);
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          throw AuthenticationFailure('Phone verification failed: ${e.message}');
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          _verificationId = verificationId;
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          _verificationId = verificationId;
+        },
+        timeout: const Duration(seconds: 60),
+      );
+      
+      // Return a pending state - actual sign in happens in verifyPhoneNumber
+      return Left(AuthenticationFailure('VERIFICATION_CODE_SENT'));
     } catch (e) {
       return Left(AuthenticationFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, void>> verifyPhoneNumber(String verificationCode) async {
+  Future<Either<Failure, UserEntity>> verifyPhoneNumber(String verificationCode) async {
     try {
-      // Implementation for phone verification
-      throw UnimplementedError('Phone verification implementation needed');
+      if (_verificationId == null) {
+        return Left(AuthenticationFailure('No verification ID found. Please request code again.'));
+      }
+
+      final credential = PhoneAuthProvider.credential(
+        verificationId: _verificationId!,
+        smsCode: verificationCode,
+      );
+
+      final UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
+      final user = userCredential.user;
+
+      if (user == null) {
+        return Left(AuthenticationFailure('Failed to sign in with phone number'));
+      }
+
+      // Check if this is the first user (bootstrap super admin)
+      final usersQuery = await _firestore.collection(AppConstants.usersCollection).limit(1).get();
+      final isFirstUser = usersQuery.docs.isEmpty;
+
+      final userEntity = UserModel(
+        id: user.uid,
+        email: user.email ?? '',
+        displayName: user.displayName ?? 'Phone User',
+        photoUrl: user.photoURL,
+        phoneNumber: user.phoneNumber,
+        role: isFirstUser ? AppConstants.roleSuperAdmin : AppConstants.roleFamilyMember,
+        status: isFirstUser ? AppConstants.userStatusApproved : AppConstants.userStatusPending,
+        createdAt: DateTime.now(),
+        permissions: isFirstUser ? [
+          AppConstants.permissionCreateFamily,
+          AppConstants.permissionManageMembers,
+          AppConstants.permissionScanImages,
+          AppConstants.permissionViewReports,
+          AppConstants.permissionExportData,
+        ] : [],
+      );
+
+      // Save user to Firestore
+      await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(user.uid)
+          .set(userEntity.toJson(), SetOptions(merge: true));
+
+      return Right(userEntity);
     } catch (e) {
       return Left(AuthenticationFailure(e.toString()));
     }

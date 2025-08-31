@@ -24,6 +24,15 @@ class BiometricAuthRequested extends AuthEvent {}
 
 class SignOutRequested extends AuthEvent {}
 
+class PhoneVerificationRequested extends AuthEvent {
+  final String verificationCode;
+
+  const PhoneVerificationRequested(this.verificationCode);
+
+  @override
+  List<Object> get props => [verificationCode];
+}
+
 class UserApprovalStatusChanged extends AuthEvent {
   final String status;
 

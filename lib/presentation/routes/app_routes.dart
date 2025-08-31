@@ -13,6 +13,7 @@ import '../pages/barcode/barcode_generator_page.dart';
 import '../pages/family/family_members_page.dart';
 import '../pages/home/home_page.dart';
 import '../pages/scanning/scan_page.dart';
+import '../pages/auth/otp_verification_page.dart';
 
 class AppRoutes {
   static const String login = '/';
@@ -23,6 +24,7 @@ class AppRoutes {
   static const String archive = '/archive';
   static const String pendingApproval = '/pending-approval';
   static const String biometricAuth = '/biometric-auth';
+  static const String otpVerification = '/otp-verification';
   static const String barcodeGenerator = '/barcode-generator';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -89,6 +91,16 @@ class AppRoutes {
           builder: (_) => BlocProvider(
             create: (context) => getIt<AuthBloc>(),
             child: const BiometricAuthPage(),
+          ),
+        );
+
+      case otpVerification:
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (context) => getIt<AuthBloc>(),
+            child: OtpVerificationPage(
+              phoneNumber: settings.arguments as String,
+            ),
           ),
         );
 

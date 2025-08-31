@@ -59,3 +59,12 @@ class BiometricAuthRequired extends AuthState {
   @override
   List<Object> get props => [user];
 }
+
+class PhoneVerificationCodeSent extends AuthState {
+  final String phoneNumber;
+
+  const PhoneVerificationCodeSent(this.phoneNumber);
+
+  @override
+  List<Object> get props => [phoneNumber];
+}
