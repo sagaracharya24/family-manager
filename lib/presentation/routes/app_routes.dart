@@ -6,6 +6,7 @@ import 'package:our_home/presentation/bloc/auth/auth_state.dart';
 
 import '../../core/di/injection_container.dart';
 import '../bloc/auth/auth_bloc.dart';
+import '../bloc/family/family_bloc.dart';
 import '../bloc/scanning/scanning_bloc.dart';
 import '../bloc/user_management/user_management_bloc.dart';
 import '../pages/admin/admin_dashboard_page.dart';
@@ -16,9 +17,11 @@ import '../pages/barcode/barcode_generator_page.dart';
 import '../pages/family/family_members_page.dart';
 import '../pages/home/home_page.dart';
 import '../pages/scanning/scan_page.dart';
+import '../pages/splash/splash_page.dart';
 
 class AppRoutes {
-  static const String login = '/';
+  static const String splash = '/';
+  static const String login = '/login';
   static const String home = '/home';
   static const String scan = '/scan';
   static const String admin = '/admin';
@@ -31,6 +34,14 @@ class AppRoutes {
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case splash:
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (context) => getIt<AuthBloc>(),
+            child: const SplashPage(),
+          ),
+        );
+
       case login:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
@@ -68,7 +79,10 @@ class AppRoutes {
 
       case family:
         return MaterialPageRoute(
-          builder: (_) => const FamilyMembersPage(),
+          builder: (_) => BlocProvider(
+            create: (context) => getIt<FamilyBloc>(),
+            child: const FamilyMembersPage(),
+          ),
         );
 
       case archive:

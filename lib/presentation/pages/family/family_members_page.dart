@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../bloc/family/family_bloc.dart';
+import '../../bloc/family/family_event.dart';
+import '../../bloc/family/family_state.dart';
 import '../../widgets/animated_card.dart';
 import '../../widgets/animated_button.dart';
 
@@ -12,6 +16,13 @@ class FamilyMembersPage extends StatefulWidget {
 }
 
 class _FamilyMembersPageState extends State<FamilyMembersPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Load family members on page load - using dummy familyId for now
+    context.read<FamilyBloc>().add(const LoadFamilyMembers(familyId: 'default_family'));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,68 +47,134 @@ class _FamilyMembersPageState extends State<FamilyMembersPage> {
   }
 
   Widget _buildFamilyMembersList() {
-    // TODO: Replace with BlocBuilder for real family members data
-    final List<dynamic> familyMembers = []; // This should come from bloc state
-    
-    if (familyMembers.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.family_restroom,
-              size: 80,
-              color: Colors.grey.shade400,
+    return BlocBuilder<FamilyBloc, FamilyState>(
+      builder: (context, state) {
+        if (state is FamilyLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        
+        if (state is FamilyError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 80,
+                  color: Colors.red.shade400,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Error loading family members',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  state.message,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              'No Family Members',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.shade600,
+          );
+        }
+        
+        if (state is FamilyMembersLoaded) {
+          if (state.members.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.family_restroom,
+                    size: 80,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No Family Members',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Add members to join the family',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: _showAddMemberDialog,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Family Member'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF667eea),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Add members to join the family',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade500,
+            );
+          }
+          
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: state.members.length,
+            itemBuilder: (context, index) {
+              return _buildMemberCard(state.members[index], index);
+            },
+          );
+        }
+        
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.family_restroom,
+                size: 80,
+                color: Colors.grey.shade400,
               ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _showAddMemberDialog,
-              icon: const Icon(Icons.add),
-              label: const Text('Add Family Member'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF667eea),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 16),
+              Text(
+                'No Family Members',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade600,
                 ),
               ),
-            ),
-          ],
-        ),
-      );
-    }
-    
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: familyMembers.length,
-      itemBuilder: (context, index) {
-        return _buildMemberCard(index);
+              const SizedBox(height: 8),
+              Text(
+                'Add members to join the family',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade500,
+                ),
+              ),
+            ],
+          ),
+        );
       },
     );
   }
 
-  Widget _buildMemberCard(int index) {
-    final roles = ['Admin', 'Member', 'Child'];
-    final role = roles[index % roles.length];
-    
+  Widget _buildMemberCard(dynamic member, int index) {
     return AnimatedCard(
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
@@ -107,10 +184,13 @@ class _FamilyMembersPageState extends State<FamilyMembersPage> {
             CircleAvatar(
               radius: 30,
               backgroundColor: Colors.blue.shade100,
-              child: Text(
-                'FM${index + 1}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
+              backgroundImage: member.photoUrl != null ? NetworkImage(member.photoUrl!) : null,
+              child: member.photoUrl == null
+                  ? Text(
+                      member.name.isNotEmpty ? member.name[0].toUpperCase() : 'M',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    )
+                  : null,
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -118,20 +198,21 @@ class _FamilyMembersPageState extends State<FamilyMembersPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Family Member ${index + 1}',
+                    member.name,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    'member${index + 1}@family.com',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 14,
+                  if (member.email != null)
+                    Text(
+                      member.email!,
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -139,13 +220,13 @@ class _FamilyMembersPageState extends State<FamilyMembersPage> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _getRoleColor(role).withOpacity(0.1),
+                      color: _getRoleColor(member.role).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      role,
+                      member.role,
                       style: TextStyle(
-                        color: _getRoleColor(role),
+                        color: _getRoleColor(member.role),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -155,7 +236,7 @@ class _FamilyMembersPageState extends State<FamilyMembersPage> {
               ),
             ),
             PopupMenuButton<String>(
-              onSelected: (value) => _handleMenuAction(value, index),
+              onSelected: (value) => _handleMenuAction(value, member.id),
               itemBuilder: (context) => [
                 const PopupMenuItem(
                   value: 'edit',
@@ -208,16 +289,16 @@ class _FamilyMembersPageState extends State<FamilyMembersPage> {
     }
   }
 
-  void _handleMenuAction(String action, int index) {
+  void _handleMenuAction(String action, String memberId) {
     switch (action) {
       case 'edit':
-        _showEditMemberDialog(index);
+        _showEditMemberDialog(memberId);
         break;
       case 'permissions':
-        _showPermissionsDialog(index);
+        _showPermissionsDialog(memberId);
         break;
       case 'remove':
-        _showRemoveConfirmation(index);
+        _showRemoveConfirmation(memberId);
         break;
     }
   }
@@ -229,26 +310,26 @@ class _FamilyMembersPageState extends State<FamilyMembersPage> {
     );
   }
 
-  void _showEditMemberDialog(int index) {
+  void _showEditMemberDialog(String memberId) {
     showDialog(
       context: context,
-      builder: (context) => EditMemberDialog(memberIndex: index),
+      builder: (context) => EditMemberDialog(memberId: memberId),
     );
   }
 
-  void _showPermissionsDialog(int index) {
+  void _showPermissionsDialog(String memberId) {
     showDialog(
       context: context,
-      builder: (context) => PermissionsDialog(memberIndex: index),
+      builder: (context) => PermissionsDialog(memberId: memberId),
     );
   }
 
-  void _showRemoveConfirmation(int index) {
+  void _showRemoveConfirmation(String memberId) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Remove Member'),
-        content: Text('Are you sure you want to remove Family Member ${index + 1}?'),
+        content: const Text('Are you sure you want to remove this family member?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -257,10 +338,7 @@ class _FamilyMembersPageState extends State<FamilyMembersPage> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              // TODO: Implement remove member
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Member removed successfully')),
-              );
+              context.read<FamilyBloc>().add(RemoveFamilyMember(memberId: memberId));
             },
             child: const Text('Remove', style: TextStyle(color: Colors.red)),
           ),
@@ -343,9 +421,9 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
 }
 
 class EditMemberDialog extends StatefulWidget {
-  final int memberIndex;
+  final String memberId;
 
-  const EditMemberDialog({super.key, required this.memberIndex});
+  const EditMemberDialog({super.key, required this.memberId});
 
   @override
   State<EditMemberDialog> createState() => _EditMemberDialogState();
@@ -359,9 +437,7 @@ class _EditMemberDialogState extends State<EditMemberDialog> {
   @override
   void initState() {
     super.initState();
-    // TODO: Load existing member data
-    _nameController.text = 'Family Member ${widget.memberIndex + 1}';
-    _emailController.text = 'member${widget.memberIndex + 1}@family.com';
+    // TODO: Load existing member data based on memberId
   }
 
   @override
@@ -423,9 +499,9 @@ class _EditMemberDialogState extends State<EditMemberDialog> {
 }
 
 class PermissionsDialog extends StatefulWidget {
-  final int memberIndex;
+  final String memberId;
 
-  const PermissionsDialog({super.key, required this.memberIndex});
+  const PermissionsDialog({super.key, required this.memberId});
 
   @override
   State<PermissionsDialog> createState() => _PermissionsDialogState();

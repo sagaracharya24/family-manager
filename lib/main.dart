@@ -58,7 +58,7 @@ class FamilyManagerApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: AppRoutes.login,
+      initialRoute: AppRoutes.splash,
       onGenerateRoute: AppRoutes.generateRoute,
     );
   }
