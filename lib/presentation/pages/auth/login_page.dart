@@ -31,9 +31,9 @@ class _LoginPageState extends State<LoginPage> {
           } else if (state is BiometricAuthRequired) {
             Navigator.pushReplacementNamed(context, '/biometric-auth');
           } else if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            _showErrorDialog(context, state.message);
+          } else if (state is AuthRejected) {
+            _showErrorDialog(context, state.message);
           }
         },
         child: Container(
@@ -186,6 +186,58 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     ).animate().fadeIn(delay: 400.ms);
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: Colors.red[600],
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Sign In Failed',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF667eea),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text(
+                'OK',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
