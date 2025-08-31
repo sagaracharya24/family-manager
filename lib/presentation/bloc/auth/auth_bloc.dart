@@ -69,14 +69,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     
-    final result = await _authRepository.signInWithGoogle(isSuperAdmin: event.isSuperAdmin);
+    final result = await _authRepository.signInWithGoogle();
     
     result.fold(
       (failure) => emit(AuthError(failure.toString())),
       (user) {
-        if (user.role == AppConstants.roleSuperAdmin) {
-          emit(AuthAuthenticated(user));
-        } else if (user.status == AppConstants.userStatusPending) {
+        if (user.status == AppConstants.userStatusPending) {
           emit(AuthPendingApproval(user));
         } else if (user.status == AppConstants.userStatusApproved) {
           emit(BiometricAuthRequired(user));
@@ -93,21 +91,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     
-    final result = await _authRepository.signInWithPhoneNumber(event.phoneNumber, isSuperAdmin: event.isSuperAdmin);
+    final result = await _authRepository.signInWithPhoneNumber(event.phoneNumber);
     
     result.fold(
       (failure) {
         if (failure.toString().contains('VERIFICATION_CODE_SENT')) {
-          _pendingPhoneIsSuperAdmin = event.isSuperAdmin;
           emit(PhoneVerificationCodeSent(event.phoneNumber));
         } else {
           emit(AuthError(failure.toString()));
         }
       },
       (user) {
-        if (user.role == AppConstants.roleSuperAdmin) {
-          emit(AuthAuthenticated(user));
-        } else if (user.status == AppConstants.userStatusPending) {
+        if (user.status == AppConstants.userStatusPending) {
           emit(AuthPendingApproval(user));
         } else if (user.status == AppConstants.userStatusApproved) {
           emit(BiometricAuthRequired(user));
@@ -129,9 +124,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) => emit(AuthError(failure.toString())),
       (user) {
-        if (user.role == AppConstants.roleSuperAdmin) {
-          emit(AuthAuthenticated(user));
-        } else if (user.status == AppConstants.userStatusPending) {
+        if (user.status == AppConstants.userStatusPending) {
           emit(AuthPendingApproval(user));
         } else if (user.status == AppConstants.userStatusApproved) {
           emit(BiometricAuthRequired(user));

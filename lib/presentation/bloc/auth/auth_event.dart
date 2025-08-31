@@ -9,23 +9,15 @@ abstract class AuthEvent extends Equatable {
 
 class AuthCheckRequested extends AuthEvent {}
 
-class GoogleSignInRequested extends AuthEvent {
-  final bool isSuperAdmin;
-
-  const GoogleSignInRequested(this.isSuperAdmin);
-
-  @override
-  List<Object> get props => [isSuperAdmin];
-}
+class GoogleSignInRequested extends AuthEvent {}
 
 class PhoneSignInRequested extends AuthEvent {
   final String phoneNumber;
-  final bool isSuperAdmin;
 
-  const PhoneSignInRequested(this.phoneNumber, this.isSuperAdmin);
+  const PhoneSignInRequested(this.phoneNumber);
 
   @override
-  List<Object> get props => [phoneNumber, isSuperAdmin];
+  List<Object> get props => [phoneNumber];
 }
 
 class BiometricAuthRequested extends AuthEvent {}

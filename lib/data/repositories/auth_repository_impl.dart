@@ -25,7 +25,7 @@ class AuthRepositoryImpl implements AuthRepository {
   ) : _localAuth = LocalAuthentication();
 
   @override
-  Future<Either<Failure, UserEntity>> signInWithGoogle({bool isSuperAdmin = false}) async {
+  Future<Either<Failure, UserEntity>> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
@@ -52,16 +52,10 @@ class AuthRepositoryImpl implements AuthRepository {
         displayName: user.displayName,
         photoUrl: user.photoURL,
         phoneNumber: user.phoneNumber,
-        role: isSuperAdmin ? AppConstants.roleSuperAdmin : AppConstants.roleFamilyMember,
-        status: isSuperAdmin ? AppConstants.userStatusApproved : AppConstants.userStatusPending,
+        role: AppConstants.roleFamilyMember,
+        status: AppConstants.userStatusPending,
         createdAt: DateTime.now(),
-        permissions: isSuperAdmin ? [
-          AppConstants.permissionCreateFamily,
-          AppConstants.permissionManageMembers,
-          AppConstants.permissionScanImages,
-          AppConstants.permissionViewReports,
-          AppConstants.permissionExportData,
-        ] : [],
+        permissions: [],
       );
 
       // Save user to Firestore
@@ -80,9 +74,9 @@ class AuthRepositoryImpl implements AuthRepository {
   bool _pendingPhoneIsSuperAdmin = false;
   
   @override
-  Future<Either<Failure, UserEntity>> signInWithPhoneNumber(String phoneNumber, {bool isSuperAdmin = false}) async {
+  Future<Either<Failure, UserEntity>> signInWithPhoneNumber(String phoneNumber) async {
     try {
-      _pendingPhoneIsSuperAdmin = isSuperAdmin;
+      _pendingPhoneIsSuperAdmin = false;
       await _firebaseAuth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         verificationCompleted: (PhoneAuthCredential credential) async {
