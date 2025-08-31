@@ -375,39 +375,73 @@ class _CreateHomeDialogState extends State<CreateHomeDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Create New Home'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(labelText: 'Home Name'),
+    return BlocListener<HomeBloc, HomeState>(
+      listener: (context, state) {
+        if (state is HomeCreated) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Home "${state.home.name}" created successfully!')),
+          );
+        } else if (state is HomeError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${state.message}'), backgroundColor: Colors.red),
+          );
+        }
+      },
+      child: AlertDialog(
+        title: const Text('Create New Home'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Home Name *',
+                hintText: 'e.g., Main House, Vacation Home',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Description *',
+                hintText: 'e.g., Family residence, Holiday home',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _addressController,
+              decoration: const InputDecoration(
+                labelText: 'Address (Optional)',
+                hintText: '123 Main St, City, State',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
           ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _descriptionController,
-            decoration: const InputDecoration(labelText: 'Description'),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _addressController,
-            decoration: const InputDecoration(labelText: 'Address (Optional)'),
+          BlocBuilder<HomeBloc, HomeState>(
+            builder: (context, state) {
+              final isLoading = state is HomeLoading;
+              return AnimatedButton(
+                onPressed: isLoading ? null : _createHome,
+                width: 100,
+                height: 40,
+                child: isLoading 
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Create'),
+              );
+            },
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        AnimatedButton(
-          onPressed: _createHome,
-          width: 100,
-          height: 40,
-          child: const Text('Create'),
-        ),
-      ],
     );
   }
 
