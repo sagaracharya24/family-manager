@@ -46,6 +46,20 @@ class AuthRepositoryImpl implements AuthRepository {
         return const Left(AuthenticationFailure('Failed to sign in with Google'));
       }
 
+      // Check if user already exists in Firestore
+      final userDoc = await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists) {
+        // User exists, return existing data without overriding
+        final userData = userDoc.data()!;
+        final existingUser = UserModel.fromJson(userData);
+        return Right(existingUser);
+      }
+
+      // New user, create with default values
       final userEntity = UserModel(
         id: user.uid,
         email: user.email ?? '',
@@ -58,11 +72,11 @@ class AuthRepositoryImpl implements AuthRepository {
         permissions: [],
       );
 
-      // Save user to Firestore
+      // Save new user to Firestore
       await _firestore
           .collection(AppConstants.usersCollection)
           .doc(user.uid)
-          .set(userEntity.toJson(), SetOptions(merge: true));
+          .set(userEntity.toJson());
 
       return Right(userEntity);
     } catch (e) {
@@ -121,29 +135,37 @@ class AuthRepositoryImpl implements AuthRepository {
         return Left(AuthenticationFailure('Failed to sign in with phone number'));
       }
 
+      // Check if user already exists in Firestore
+      final userDoc = await _firestore
+          .collection(AppConstants.usersCollection)
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists) {
+        // User exists, return existing data without overriding
+        final userData = userDoc.data()!;
+        final existingUser = UserModel.fromJson(userData);
+        return Right(existingUser);
+      }
+
+      // New user, create with default values
       final userEntity = UserModel(
         id: user.uid,
         email: user.email ?? '',
         displayName: user.displayName ?? 'Phone User',
         photoUrl: user.photoURL,
         phoneNumber: user.phoneNumber,
-        role: _pendingPhoneIsSuperAdmin ? AppConstants.roleSuperAdmin : AppConstants.roleFamilyMember,
-        status: _pendingPhoneIsSuperAdmin ? AppConstants.userStatusApproved : AppConstants.userStatusPending,
+        role: AppConstants.roleFamilyMember,
+        status: AppConstants.userStatusPending,
         createdAt: DateTime.now(),
-        permissions: _pendingPhoneIsSuperAdmin ? [
-          AppConstants.permissionCreateFamily,
-          AppConstants.permissionManageMembers,
-          AppConstants.permissionScanImages,
-          AppConstants.permissionViewReports,
-          AppConstants.permissionExportData,
-        ] : [],
+        permissions: [],
       );
 
-      // Save user to Firestore
+      // Save new user to Firestore
       await _firestore
           .collection(AppConstants.usersCollection)
           .doc(user.uid)
-          .set(userEntity.toJson(), SetOptions(merge: true));
+          .set(userEntity.toJson());
 
       return Right(userEntity);
     } catch (e) {

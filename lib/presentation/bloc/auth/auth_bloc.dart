@@ -74,7 +74,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) => emit(AuthError(failure.toString())),
       (user) {
-        if (user.status == AppConstants.userStatusPending) {
+        if (user.role == AppConstants.roleSuperAdmin) {
+          emit(AuthAuthenticated(user));
+        } else if (user.status == AppConstants.userStatusPending) {
           emit(AuthPendingApproval(user));
         } else if (user.status == AppConstants.userStatusApproved) {
           emit(BiometricAuthRequired(user));
@@ -102,7 +104,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
       },
       (user) {
-        if (user.status == AppConstants.userStatusPending) {
+        if (user.role == AppConstants.roleSuperAdmin) {
+          emit(AuthAuthenticated(user));
+        } else if (user.status == AppConstants.userStatusPending) {
           emit(AuthPendingApproval(user));
         } else if (user.status == AppConstants.userStatusApproved) {
           emit(BiometricAuthRequired(user));
@@ -124,7 +128,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) => emit(AuthError(failure.toString())),
       (user) {
-        if (user.status == AppConstants.userStatusPending) {
+        if (user.role == AppConstants.roleSuperAdmin) {
+          emit(AuthAuthenticated(user));
+        } else if (user.status == AppConstants.userStatusPending) {
           emit(AuthPendingApproval(user));
         } else if (user.status == AppConstants.userStatusApproved) {
           emit(BiometricAuthRequired(user));

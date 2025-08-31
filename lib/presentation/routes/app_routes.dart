@@ -183,18 +183,18 @@ class BiometricAuthPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            Navigator.pushReplacementNamed(context, '/home');
-          } else if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-          }
-        },
-        child: Container(
-          decoration: const BoxDecoration(
+        body: BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthAuthenticated) {
+          Navigator.pushReplacementNamed(context, '/home');
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      child: Container(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFF667eea), Color(0xFF764ba2)],
           ),
@@ -300,6 +300,6 @@ class BiometricAuthPage extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }

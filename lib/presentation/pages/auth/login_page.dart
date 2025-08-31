@@ -25,7 +25,11 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            Navigator.pushReplacementNamed(context, '/home');
+            if (state.user.role == 'super_admin') {
+              Navigator.pushReplacementNamed(context, '/admin');
+            } else {
+              Navigator.pushReplacementNamed(context, '/home');
+            }
           } else if (state is AuthPendingApproval) {
             Navigator.pushReplacementNamed(context, '/pending-approval');
           } else if (state is BiometricAuthRequired) {
