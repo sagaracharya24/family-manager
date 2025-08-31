@@ -30,7 +30,7 @@ class _SplashPageState extends State<SplashPage> {
             if (state.user.role == 'super_admin') {
               Navigator.pushReplacementNamed(context, '/admin');
             } else {
-              Navigator.pushReplacementNamed(context, '/home');
+              Navigator.pushReplacementNamed(context, '/homes');
             }
           } else if (state is AuthPendingApproval) {
             Navigator.pushReplacementNamed(context, '/pending-approval');

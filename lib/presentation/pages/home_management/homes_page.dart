@@ -48,15 +48,22 @@ class _HomesPageState extends State<HomesPage> {
           IconButton(
             icon: const Icon(Icons.add_home),
             onPressed: _showCreateHomeDialog,
+            tooltip: 'Create New Home',
           ),
         ],
       ),
       body: Column(
         children: [
           Expanded(flex: 1, child: _buildHomesList()),
-          if (selectedHomeId != null)
-            Expanded(flex: 2, child: _buildFamilyMembersList()),
+          Expanded(flex: 2, child: _buildFamilyMembersList()),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showCreateHomeDialog,
+        icon: const Icon(Icons.add_home),
+        label: const Text('Create Home'),
+        backgroundColor: const Color(0xFF667eea),
+        foregroundColor: Colors.white,
       ),
     );
   }
@@ -193,93 +200,122 @@ class _HomesPageState extends State<HomesPage> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                const Text('Family Members', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.person_add),
-                  onPressed: () => _showAddMemberDialog(),
+                Text(
+                  selectedHomeId != null ? 'Family Members' : 'Select a Home First',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
+                const Spacer(),
+                if (selectedHomeId != null)
+                  IconButton(
+                    icon: const Icon(Icons.person_add),
+                    onPressed: () => _showAddMemberDialog(),
+                    tooltip: 'Add Family Member',
+                  ),
               ],
             ),
           ),
           Expanded(
-            child: BlocBuilder<FamilyBloc, FamilyState>(
-              builder: (context, state) {
-                if (state is FamilyLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                
-                if (state is FamilyError) {
-                  return Center(
+            child: selectedHomeId == null
+                ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.error_outline, size: 60, color: Colors.red.shade400),
+                        Icon(Icons.home_outlined, size: 60, color: Colors.grey.shade400),
                         const SizedBox(height: 16),
-                        Text('Error loading members', style: TextStyle(fontSize: 16, color: Colors.grey.shade600)),
-                        Text(state.message, style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+                        Text('Select a Home', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade600)),
+                        const SizedBox(height: 8),
+                        Text('Choose a home above to view its members', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
                       ],
                     ),
-                  );
-                }
-                
-                if (state is FamilyMembersLoaded) {
-                  if (state.members.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.people_outline, size: 60, color: Colors.grey.shade400),
-                          const SizedBox(height: 16),
-                          Text('No Family Members', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade600)),
-                          const SizedBox(height: 8),
-                          Text('Add members to this home', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            onPressed: () => _showAddMemberDialog(),
-                            icon: const Icon(Icons.person_add),
-                            label: const Text('Add Member'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF667eea),
-                              foregroundColor: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  
-                  return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: state.members.length,
-                    itemBuilder: (context, index) {
-                      final member = state.members[index];
-                      return AnimatedCard(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.blue.shade100,
-                            child: Text(member.name.isNotEmpty ? member.name[0].toUpperCase() : 'M'),
-                          ),
-                          title: Text(member.name),
-                          subtitle: member.email != null ? Text(member.email!) : null,
-                          trailing: PopupMenuButton<String>(
-                            onSelected: (value) => _handleMemberAction(value, member.id),
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                              const PopupMenuItem(value: 'permissions', child: Text('Permissions')),
-                              const PopupMenuItem(value: 'remove', child: Text('Remove', style: TextStyle(color: Colors.red))),
+                  )
+                : BlocBuilder<FamilyBloc, FamilyState>(
+                    builder: (context, state) {
+                      if (state is FamilyLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      
+                      if (state is FamilyError) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.error_outline, size: 60, color: Colors.red.shade400),
+                              const SizedBox(height: 16),
+                              Text('Error loading members', style: TextStyle(fontSize: 16, color: Colors.grey.shade600)),
+                              Text(state.message, style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
                             ],
                           ),
+                        );
+                      }
+                      
+                      if (state is FamilyMembersLoaded) {
+                        if (state.members.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.people_outline, size: 60, color: Colors.grey.shade400),
+                                const SizedBox(height: 16),
+                                Text('No Family Members', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade600)),
+                                const SizedBox(height: 8),
+                                Text('Add members to this home', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+                                const SizedBox(height: 16),
+                                ElevatedButton.icon(
+                                  onPressed: () => _showAddMemberDialog(),
+                                  icon: const Icon(Icons.person_add),
+                                  label: const Text('Add Member'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF667eea),
+                                    foregroundColor: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        
+                        return ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: state.members.length,
+                          itemBuilder: (context, index) {
+                            final member = state.members[index];
+                            return AnimatedCard(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.blue.shade100,
+                                  child: Text(member.name.isNotEmpty ? member.name[0].toUpperCase() : 'M'),
+                                ),
+                                title: Text(member.name),
+                                subtitle: member.email != null ? Text(member.email!) : null,
+                                trailing: PopupMenuButton<String>(
+                                  onSelected: (value) => _handleMemberAction(value, member.id),
+                                  itemBuilder: (context) => [
+                                    const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                                    const PopupMenuItem(value: 'permissions', child: Text('Permissions')),
+                                    const PopupMenuItem(value: 'remove', child: Text('Remove', style: TextStyle(color: Colors.red))),
+                                  ],
+                                ),
+                              ),
+                            ).animate(delay: (index * 50).ms).slideX(begin: 0.2).fadeIn();
+                          },
+                        );
+                      }
+                      
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.people_outline, size: 60, color: Colors.grey.shade400),
+                            const SizedBox(height: 16),
+                            Text('Ready to Load Members', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade600)),
+                            const SizedBox(height: 8),
+                            Text('Members will appear here when loaded', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+                          ],
                         ),
-                      ).animate(delay: (index * 50).ms).slideX(begin: 0.2).fadeIn();
+                      );
                     },
-                  );
-                }
-                
-                return const Center(child: Text('Select a home to view members'));
-              },
-            ),
+                  ),
           ),
         ],
       ),
@@ -367,16 +403,28 @@ class _CreateHomeDialogState extends State<CreateHomeDialog> {
   }
 
   void _createHome() {
-    if (_nameController.text.isNotEmpty && _descriptionController.text.isNotEmpty) {
-      final authState = context.read<AuthBloc>().state;
-      if (authState is AuthAuthenticated) {
-        context.read<HomeBloc>().add(CreateHome(
-          name: _nameController.text,
-          description: _descriptionController.text,
-          adminId: authState.user.id,
-          address: _addressController.text.isNotEmpty ? _addressController.text : null,
-        ));
-      }
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a home name')),
+      );
+      return;
+    }
+    
+    if (_descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a description')),
+      );
+      return;
+    }
+    
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      context.read<HomeBloc>().add(CreateHome(
+        name: _nameController.text.trim(),
+        description: _descriptionController.text.trim(),
+        adminId: authState.user.id,
+        address: _addressController.text.trim().isNotEmpty ? _addressController.text.trim() : null,
+      ));
       Navigator.pop(context);
     }
   }

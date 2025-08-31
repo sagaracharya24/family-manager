@@ -17,6 +17,11 @@ class HomePage extends StatelessWidget {
         title: const Text('OurHome'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.home_work),
+            onPressed: () => Navigator.pushNamed(context, '/homes'),
+            tooltip: 'Manage Homes',
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
               // TODO: Implement sign out
