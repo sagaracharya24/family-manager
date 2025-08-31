@@ -84,6 +84,31 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
+  Stream<List<UserEntity>> getPendingUsersStream() {
+    return _firestore
+        .collection(AppConstants.usersCollection)
+        .where('status', isEqualTo: AppConstants.userStatusPending)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => UserModel.fromJson(doc.data()))
+            .cast<UserEntity>()
+            .toList());
+  }
+
+  @override
+  Stream<List<UserEntity>> getAllUsersStream() {
+    return _firestore
+        .collection(AppConstants.usersCollection)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => UserModel.fromJson(doc.data()))
+            .cast<UserEntity>()
+            .toList());
+  }
+
+  @override
   Future<Either<Failure, List<UserEntity>>> getAllUsers() async {
     try {
       final querySnapshot = await _firestore

@@ -95,76 +95,22 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
           );
         }
         
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: 3,
-          itemBuilder: (context, index) {
-            return UserApprovalCard(
-              userName: 'Sample User ${index + 1}',
-              userEmail: 'user${index + 1}@example.com',
-              joinDate: DateTime.now().subtract(Duration(days: index)),
-              onApprove: () => _approveUser('sample_$index'),
-              onReject: () => _rejectUser('sample_$index'),
-            ).animate(delay: (index * 100).ms).slideX(begin: -0.2).fadeIn();
-          },
+        return const Center(
+          child: Text('No pending users'),
         );
       },
     );
   }
 
   Widget _buildAllUsersTab() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: 10, // TODO: Replace with actual data
-      itemBuilder: (context, index) {
-        return AnimatedCard(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.blue.shade100,
-              child: Text('U${index + 1}'),
-            ),
-            title: Text('User ${index + 1}'),
-            subtitle: Text('user${index + 1}@example.com'),
-            trailing: Chip(
-              label: Text(index % 3 == 0 ? 'Admin' : 'Member'),
-              backgroundColor: index % 3 == 0 ? Colors.red.shade100 : Colors.green.shade100,
-            ),
-          ),
-        ).animate(delay: (index * 50).ms).slideX(begin: 0.2).fadeIn();
-      },
+    return const Center(
+      child: Text('All users tab - implement with real data'),
     );
   }
 
   Widget _buildScannedDataTab() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: 8, // TODO: Replace with actual data
-      itemBuilder: (context, index) {
-        return AnimatedCard(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            leading: Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.purple.shade100,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.document_scanner, color: Colors.purple),
-            ),
-            title: Text('Document ${index + 1}'),
-            subtitle: Text('Scanned by User ${(index % 3) + 1}'),
-            trailing: Text(
-              '${index + 1}d ago',
-              style: TextStyle(color: Colors.grey.shade600),
-            ),
-            onTap: () {
-              // TODO: Navigate to document details
-            },
-          ),
-        ).animate(delay: (index * 50).ms).slideX(begin: 0.2).fadeIn();
-      },
+    return const Center(
+      child: Text('Scanned data tab - implement with real data'),
     );
   }
 
