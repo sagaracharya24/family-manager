@@ -17,14 +17,19 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<Either<Failure, HomeEntity>> createHome(HomeEntity home) async {
     try {
+      print('HomeRepository: Creating home in Firestore: ${home.name}');
       final homeModel = HomeModel.fromEntity(home);
+      print('HomeRepository: Home model JSON: ${homeModel.toJson()}');
+      
       await _firestore
           .collection(AppConstants.homesCollection)
           .doc(home.id)
           .set(homeModel.toJson());
       
+      print('HomeRepository: Home created successfully in Firestore');
       return Right(home);
     } catch (e) {
+      print('HomeRepository: Error creating home: ${e.toString()}');
       return Left(ServerFailure('Failed to create home: ${e.toString()}'));
     }
   }

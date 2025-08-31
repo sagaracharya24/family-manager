@@ -46,6 +46,11 @@ class _HomesPageState extends State<HomesPage> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.bug_report),
+            onPressed: _testCreateHome,
+            tooltip: 'Test Create Home',
+          ),
+          IconButton(
             icon: const Icon(Icons.add_home),
             onPressed: _showCreateHomeDialog,
             tooltip: 'Create New Home',
@@ -359,6 +364,20 @@ class _HomesPageState extends State<HomesPage> {
         break;
     }
   }
+
+  void _testCreateHome() {
+    print('Test button pressed - creating test home');
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      context.read<HomeBloc>().add(CreateHome(
+        name: 'Test Home ${DateTime.now().millisecondsSinceEpoch}',
+        description: 'Test description',
+        adminId: authState.user.id,
+      ));
+    } else {
+      print('User not authenticated for test');
+    }
+  }
 }
 
 class CreateHomeDialog extends StatefulWidget {
@@ -399,6 +418,7 @@ class _CreateHomeDialogState extends State<CreateHomeDialog> {
                 labelText: 'Home Name *',
                 hintText: 'e.g., Main House, Vacation Home',
               ),
+              onChanged: (value) => print('Name field: $value'),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -427,7 +447,10 @@ class _CreateHomeDialogState extends State<CreateHomeDialog> {
             builder: (context, state) {
               final isLoading = state is HomeLoading;
               return AnimatedButton(
-                onPressed: isLoading ? null : _createHome,
+                onPressed: isLoading ? null : () {
+                  print('Create button pressed!');
+                  _createHome();
+                },
                 width: 100,
                 height: 40,
                 child: isLoading 
@@ -446,7 +469,10 @@ class _CreateHomeDialogState extends State<CreateHomeDialog> {
   }
 
   void _createHome() {
+    print('Create home button clicked');
+    
     if (_nameController.text.trim().isEmpty) {
+      print('Validation failed: empty name');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a home name')),
       );
@@ -454,6 +480,7 @@ class _CreateHomeDialogState extends State<CreateHomeDialog> {
     }
     
     if (_descriptionController.text.trim().isEmpty) {
+      print('Validation failed: empty description');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a description')),
       );
@@ -461,7 +488,10 @@ class _CreateHomeDialogState extends State<CreateHomeDialog> {
     }
     
     final authState = context.read<AuthBloc>().state;
+    print('Auth state: ${authState.runtimeType}');
+    
     if (authState is AuthAuthenticated) {
+      print('Creating home: ${_nameController.text.trim()}');
       context.read<HomeBloc>().add(CreateHome(
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
@@ -469,6 +499,11 @@ class _CreateHomeDialogState extends State<CreateHomeDialog> {
         address: _addressController.text.trim().isNotEmpty ? _addressController.text.trim() : null,
       ));
       Navigator.pop(context);
+    } else {
+      print('User not authenticated');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please log in first')),
+      );
     }
   }
 
@@ -556,3 +591,4 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
     super.dispose();
   }
 }
+

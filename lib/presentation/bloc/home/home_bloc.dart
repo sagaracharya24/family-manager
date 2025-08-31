@@ -40,9 +40,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     CreateHome event,
     Emitter<HomeState> emit,
   ) async {
+    print('HomeBloc: Creating home "${event.name}" for admin ${event.adminId}');
     emit(HomeLoading());
     
     final homeId = DateTime.now().millisecondsSinceEpoch.toString();
+    print('HomeBloc: Generated home ID: $homeId');
     
     final result = await _createHome(create_home_usecase.CreateHomeParams(
       id: homeId,
@@ -54,8 +56,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     ));
     
     result.fold(
-      (failure) => emit(HomeError(failure.toString())),
-      (home) => emit(HomeCreated(home)),
+      (failure) {
+        print('HomeBloc: Home creation failed: ${failure.toString()}');
+        emit(HomeError(failure.toString()));
+      },
+      (home) {
+        print('HomeBloc: Home created successfully: ${home.name}');
+        emit(HomeCreated(home));
+      },
     );
   }
 
