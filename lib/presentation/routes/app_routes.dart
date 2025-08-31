@@ -7,6 +7,7 @@ import 'package:our_home/presentation/bloc/auth/auth_state.dart';
 import '../../core/di/injection_container.dart';
 import '../bloc/auth/auth_bloc.dart';
 import '../bloc/family/family_bloc.dart';
+import '../bloc/home/home_bloc.dart';
 import '../bloc/scanning/scanning_bloc.dart';
 import '../bloc/user_management/user_management_bloc.dart';
 import '../pages/admin/admin_dashboard_page.dart';
@@ -16,6 +17,7 @@ import '../pages/auth/otp_verification_page.dart';
 import '../pages/barcode/barcode_generator_page.dart';
 import '../pages/family/family_members_page.dart';
 import '../pages/home/home_page.dart';
+import '../pages/home_management/homes_page.dart';
 import '../pages/scanning/scan_page.dart';
 import '../pages/splash/splash_page.dart';
 
@@ -26,6 +28,7 @@ class AppRoutes {
   static const String scan = '/scan';
   static const String admin = '/admin';
   static const String family = '/family';
+  static const String homes = '/homes';
   static const String archive = '/archive';
   static const String pendingApproval = '/pending-approval';
   static const String biometricAuth = '/biometric-auth';
@@ -82,6 +85,18 @@ class AppRoutes {
           builder: (_) => BlocProvider(
             create: (context) => getIt<FamilyBloc>(),
             child: const FamilyMembersPage(),
+          ),
+        );
+
+      case homes:
+        return MaterialPageRoute(
+          builder: (_) => MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (context) => getIt<HomeBloc>()),
+              BlocProvider(create: (context) => getIt<FamilyBloc>()),
+              BlocProvider(create: (context) => getIt<AuthBloc>()),
+            ],
+            child: const HomesPage(),
           ),
         );
 

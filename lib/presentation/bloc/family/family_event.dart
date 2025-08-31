@@ -8,29 +8,29 @@ abstract class FamilyEvent extends Equatable {
 }
 
 class LoadFamilyMembers extends FamilyEvent {
-  final String familyId;
+  final String homeId;
   
-  const LoadFamilyMembers({required this.familyId});
+  const LoadFamilyMembers({required this.homeId});
   
   @override
-  List<Object> get props => [familyId];
+  List<Object> get props => [homeId];
 }
 
 class AddFamilyMember extends FamilyEvent {
   final String name;
   final String email;
   final String role;
-  final String familyId;
+  final String homeId;
   
   const AddFamilyMember({
     required this.name,
     required this.email,
     required this.role,
-    required this.familyId,
+    required this.homeId,
   });
   
   @override
-  List<Object> get props => [name, email, role, familyId];
+  List<Object> get props => [name, email, role, homeId];
 }
 
 class UpdateFamilyMember extends FamilyEvent {

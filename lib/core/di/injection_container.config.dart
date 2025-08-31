@@ -20,22 +20,27 @@ import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 import '../../data/repositories/auth_repository_impl.dart' as _i895;
 import '../../data/repositories/family_repository_impl.dart' as _i1059;
+import '../../data/repositories/home_repository_impl.dart' as _i514;
 import '../../data/repositories/scanning_repository_impl.dart' as _i879;
 import '../../data/repositories/user_repository_impl.dart' as _i790;
 import '../../domain/repositories/auth_repository.dart' as _i1073;
 import '../../domain/repositories/family_repository.dart' as _i866;
+import '../../domain/repositories/home_repository.dart' as _i826;
 import '../../domain/repositories/scanning_repository.dart' as _i858;
 import '../../domain/repositories/user_repository.dart' as _i271;
 import '../../domain/usecases/auth/authenticate_with_biometrics.dart' as _i93;
 import '../../domain/usecases/auth/sign_in_with_google.dart' as _i777;
 import '../../domain/usecases/auth/sign_in_with_phone.dart' as _i879;
 import '../../domain/usecases/family/get_family_members.dart' as _i759;
+import '../../domain/usecases/home/create_home.dart' as _i979;
+import '../../domain/usecases/home/get_user_homes.dart' as _i642;
 import '../../domain/usecases/scanning/scan_image.dart' as _i303;
 import '../../domain/usecases/user/approve_user.dart' as _i700;
 import '../../domain/usecases/user/get_pending_users.dart' as _i742;
 import '../../domain/usecases/user/reject_user.dart' as _i208;
 import '../../presentation/bloc/auth/auth_bloc.dart' as _i605;
 import '../../presentation/bloc/family/family_bloc.dart' as _i566;
+import '../../presentation/bloc/home/home_bloc.dart' as _i751;
 import '../../presentation/bloc/scanning/scanning_bloc.dart' as _i339;
 import '../../presentation/bloc/user_management/user_management_bloc.dart'
     as _i282;
@@ -71,6 +76,8 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i116.GoogleSignIn>(),
           gh<_i974.FirebaseFirestore>(),
         ));
+    gh.lazySingleton<_i826.HomeRepository>(
+        () => _i514.HomeRepositoryImpl(gh<_i974.FirebaseFirestore>()));
     gh.lazySingleton<_i271.UserRepository>(
         () => _i790.UserRepositoryImpl(gh<_i974.FirebaseFirestore>()));
     gh.lazySingleton<_i866.FamilyRepository>(
@@ -100,8 +107,16 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i208.RejectUser(gh<_i271.UserRepository>()));
     gh.lazySingleton<_i303.ScanImage>(
         () => _i303.ScanImage(gh<_i858.ScanningRepository>()));
+    gh.factory<_i642.GetUserHomes>(
+        () => _i642.GetUserHomes(gh<_i826.HomeRepository>()));
+    gh.factory<_i979.CreateHome>(
+        () => _i979.CreateHome(gh<_i826.HomeRepository>()));
     gh.factory<_i759.GetFamilyMembers>(
         () => _i759.GetFamilyMembers(gh<_i866.FamilyRepository>()));
+    gh.factory<_i751.HomeBloc>(() => _i751.HomeBloc(
+          gh<_i642.GetUserHomes>(),
+          gh<_i979.CreateHome>(),
+        ));
     gh.factory<_i282.UserManagementBloc>(() => _i282.UserManagementBloc(
           gh<_i700.ApproveUser>(),
           gh<_i208.RejectUser>(),

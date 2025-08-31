@@ -45,11 +45,11 @@ class FamilyRepositoryImpl implements FamilyRepository {
   }
 
   @override
-  Future<Either<Failure, List<FamilyMemberEntity>>> getFamilyMembers(String familyId) async {
+  Future<Either<Failure, List<FamilyMemberEntity>>> getFamilyMembers(String homeId) async {
     try {
       final querySnapshot = await _firestore
           .collection(AppConstants.familyMembersCollection)
-          .where('familyId', isEqualTo: familyId)
+          .where('homeId', isEqualTo: homeId)
           .where('isActive', isEqualTo: true)
           .orderBy('createdAt', descending: false)
           .get();
@@ -117,5 +117,19 @@ class FamilyRepositoryImpl implements FamilyRepository {
     } catch (e) {
       return Left(ServerFailure('Failed to assign permissions: ${e.toString()}'));
     }
+  }
+
+  @override
+  Stream<List<FamilyMemberEntity>> getFamilyMembersStream(String homeId) {
+    return _firestore
+        .collection(AppConstants.familyMembersCollection)
+        .where('homeId', isEqualTo: homeId)
+        .where('isActive', isEqualTo: true)
+        .orderBy('createdAt', descending: false)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => FamilyMemberModel.fromJson(doc.data()))
+            .cast<FamilyMemberEntity>()
+            .toList());
   }
 }

@@ -1,24 +1,20 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'family_member_model.dart';
+part of 'home_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-FamilyMemberModel _$FamilyMemberModelFromJson(Map<String, dynamic> json) =>
-    FamilyMemberModel(
+HomeModel _$HomeModelFromJson(Map<String, dynamic> json) => HomeModel(
       id: json['id'] as String,
-      homeId: json['homeId'] as String,
-      userId: json['userId'] as String,
       name: json['name'] as String,
-      email: json['email'] as String?,
-      phoneNumber: json['phoneNumber'] as String?,
+      description: json['description'] as String,
+      adminId: json['adminId'] as String,
+      address: json['address'] as String?,
       photoUrl: json['photoUrl'] as String?,
-      role: json['role'] as String,
-      permissions: (json['permissions'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      memberIds:
+          (json['memberIds'] as List<dynamic>).map((e) => e as String).toList(),
       isActive: json['isActive'] as bool,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: json['updatedAt'] == null
@@ -26,17 +22,14 @@ FamilyMemberModel _$FamilyMemberModelFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['updatedAt'] as String),
     );
 
-Map<String, dynamic> _$FamilyMemberModelToJson(FamilyMemberModel instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$HomeModelToJson(HomeModel instance) => <String, dynamic>{
       'id': instance.id,
-      'homeId': instance.homeId,
-      'userId': instance.userId,
       'name': instance.name,
-      'email': instance.email,
-      'phoneNumber': instance.phoneNumber,
+      'description': instance.description,
+      'adminId': instance.adminId,
+      'address': instance.address,
       'photoUrl': instance.photoUrl,
-      'role': instance.role,
-      'permissions': instance.permissions,
+      'memberIds': instance.memberIds,
       'isActive': instance.isActive,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),

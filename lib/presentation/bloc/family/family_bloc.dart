@@ -25,7 +25,7 @@ class FamilyBloc extends Bloc<FamilyEvent, FamilyState> {
   ) async {
     emit(FamilyLoading());
     
-    final result = await _getFamilyMembers(GetFamilyMembersParams(familyId: event.familyId));
+    final result = await _getFamilyMembers(GetFamilyMembersParams(homeId: event.homeId));
     
     result.fold(
       (failure) => emit(FamilyError(failure.toString())),

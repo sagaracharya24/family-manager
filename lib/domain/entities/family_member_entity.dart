@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class FamilyMemberEntity extends Equatable {
   final String id;
-  final String familyId;
+  final String homeId; // Changed from familyId to homeId
   final String userId;
   final String name;
   final String? email;
@@ -16,7 +16,7 @@ class FamilyMemberEntity extends Equatable {
 
   const FamilyMemberEntity({
     required this.id,
-    required this.familyId,
+    required this.homeId,
     required this.userId,
     required this.name,
     this.email,
@@ -32,7 +32,7 @@ class FamilyMemberEntity extends Equatable {
   @override
   List<Object?> get props => [
         id,
-        familyId,
+        homeId,
         userId,
         name,
         email,

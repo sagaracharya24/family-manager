@@ -19,8 +19,8 @@ class _FamilyMembersPageState extends State<FamilyMembersPage> {
   @override
   void initState() {
     super.initState();
-    // Load family members on page load - using dummy familyId for now
-    context.read<FamilyBloc>().add(const LoadFamilyMembers(familyId: 'default_family'));
+    // Load family members on page load - using dummy homeId for now
+    context.read<FamilyBloc>().add(const LoadFamilyMembers(homeId: 'default_home'));
   }
 
   @override

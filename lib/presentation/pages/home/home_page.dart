@@ -111,11 +111,11 @@ class HomePage extends StatelessWidget {
         route: '/scan',
       ),
       FeatureData(
-        title: 'Family Members',
-        subtitle: 'Manage family',
-        icon: Icons.people,
+        title: 'My Homes',
+        subtitle: 'Manage homes & members',
+        icon: Icons.home,
         color: Colors.green,
-        route: '/family',
+        route: '/homes',
       ),
       FeatureData(
         title: 'Data Archive',

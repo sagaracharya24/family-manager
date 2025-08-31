@@ -8,7 +8,7 @@ part 'family_member_model.g.dart';
 class FamilyMemberModel extends FamilyMemberEntity {
   const FamilyMemberModel({
     required super.id,
-    required super.familyId,
+    required super.homeId,
     required super.userId,
     required super.name,
     super.email,
@@ -28,7 +28,7 @@ class FamilyMemberModel extends FamilyMemberEntity {
   factory FamilyMemberModel.fromEntity(FamilyMemberEntity entity) {
     return FamilyMemberModel(
       id: entity.id,
-      familyId: entity.familyId,
+      homeId: entity.homeId,
       userId: entity.userId,
       name: entity.name,
       email: entity.email,

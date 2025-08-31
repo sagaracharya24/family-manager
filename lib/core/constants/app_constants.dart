@@ -4,6 +4,7 @@ class AppConstants {
   
   // Collections
   static const String usersCollection = 'users';
+  static const String homesCollection = 'homes';
   static const String familyMembersCollection = 'family_members';
   static const String scannedDataCollection = 'scanned_data';
   static const String permissionsCollection = 'permissions';

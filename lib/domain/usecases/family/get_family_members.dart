@@ -14,12 +14,12 @@ class GetFamilyMembers implements UseCase<List<FamilyMemberEntity>, GetFamilyMem
 
   @override
   Future<Either<Failure, List<FamilyMemberEntity>>> call(GetFamilyMembersParams params) async {
-    return await repository.getFamilyMembers(params.familyId);
+    return await repository.getFamilyMembers(params.homeId);
   }
 }
 
 class GetFamilyMembersParams {
-  final String familyId;
+  final String homeId;
 
-  GetFamilyMembersParams({required this.familyId});
+  GetFamilyMembersParams({required this.homeId});
 }
