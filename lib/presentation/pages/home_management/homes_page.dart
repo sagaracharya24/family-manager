@@ -325,7 +325,13 @@ class _HomesPageState extends State<HomesPage> {
   void _showCreateHomeDialog() {
     showDialog(
       context: context,
-      builder: (context) => const CreateHomeDialog(),
+      builder: (dialogContext) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<HomeBloc>()),
+          BlocProvider.value(value: context.read<AuthBloc>()),
+        ],
+        child: const CreateHomeDialog(),
+      ),
     );
   }
 
@@ -333,7 +339,10 @@ class _HomesPageState extends State<HomesPage> {
     if (selectedHomeId == null) return;
     showDialog(
       context: context,
-      builder: (context) => AddMemberDialog(homeId: selectedHomeId!),
+      builder: (dialogContext) => BlocProvider.value(
+        value: context.read<FamilyBloc>(),
+        child: AddMemberDialog(homeId: selectedHomeId!),
+      ),
     );
   }
 
