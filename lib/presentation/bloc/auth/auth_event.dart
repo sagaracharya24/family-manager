@@ -22,6 +22,8 @@ class PhoneSignInRequested extends AuthEvent {
 
 class BiometricAuthRequested extends AuthEvent {}
 
+class BiometricAuthSkipped extends AuthEvent {}
+
 class SignOutRequested extends AuthEvent {}
 
 class PhoneVerificationRequested extends AuthEvent {

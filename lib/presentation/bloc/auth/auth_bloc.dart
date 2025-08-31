@@ -30,6 +30,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<PhoneSignInRequested>(_onPhoneSignInRequested);
     on<PhoneVerificationRequested>(_onPhoneVerificationRequested);
     on<BiometricAuthRequested>(_onBiometricAuthRequested);
+    on<BiometricAuthSkipped>(_onBiometricAuthSkipped);
     on<SignOutRequested>(_onSignOutRequested);
     on<UserApprovalStatusChanged>(_onUserApprovalStatusChanged);
   }
@@ -152,6 +153,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
       },
     );
+  }
+
+  Future<void> _onBiometricAuthSkipped(
+    BiometricAuthSkipped event,
+    Emitter<AuthState> emit,
+  ) async {
+    if (state is! BiometricAuthRequired) return;
+    
+    final user = (state as BiometricAuthRequired).user;
+    emit(AuthAuthenticated(user));
   }
 
   Future<void> _onSignOutRequested(
