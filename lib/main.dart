@@ -9,16 +9,28 @@ import 'presentation/routes/app_routes.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase
-  await Firebase.initializeApp();
-  
-  // Initialize dependency injection
-  await configureDependencies();
-  
-  // Initialize notifications
-  // await getIt<NotificationService>().initialize();
-  
-  runApp(const FamilyManagerApp());
+  try {
+    // Initialize Firebase first
+    await Firebase.initializeApp();
+    
+    // Initialize dependency injection after Firebase
+    await configureDependencies();
+    
+    // Initialize notifications
+    // await getIt<NotificationService>().initialize();
+    
+    runApp(const FamilyManagerApp());
+  } catch (e) {
+    print('Failed to initialize app: $e');
+    // You might want to show an error screen here
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text('Failed to initialize app: $e'),
+        ),
+      ),
+    ));
+  }
 }
 
 class FamilyManagerApp extends StatelessWidget {
