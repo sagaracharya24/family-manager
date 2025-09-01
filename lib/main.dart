@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'core/config/app_config.dart';
 import 'core/di/injection_container.dart';
 import 'core/services/notification_service.dart';
+import 'firebase_options.dart';
 import 'presentation/routes/app_routes.dart';
 
 Future<void> main() async {
@@ -11,7 +12,9 @@ Future<void> main() async {
   
   try {
     // Initialize Firebase first
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     
     // Initialize dependency injection after Firebase
     await configureDependencies();
