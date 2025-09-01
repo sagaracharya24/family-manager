@@ -56,6 +56,10 @@
 	<key>NSContactsUsageDescription</key>
 	<string>This app needs contacts access to add family members.</string>
 	
+	<!-- Google Sign In Configuration -->
+	<key>GIDClientID</key>
+	<string>85239595226-39o2325p2v9mtsccfih3sf3k8d2altpp.apps.googleusercontent.com</string>
+	
 	<!-- URL Schemes for Google Sign In -->
 	<key>CFBundleURLTypes</key>
 	<array>
@@ -65,6 +69,14 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>GoogleSignIn</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.85239595226-39o2325p2v9mtsccfih3sf3k8d2altpp</string>
 			</array>
 		</dict>
 	</array>
