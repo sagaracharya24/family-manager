@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'core/config/app_config.dart';
 import 'core/di/injection_container.dart';
-import 'core/services/notification_service.dart';
+// import 'core/services/notification_service.dart';  // Temporarily disabled
 import 'firebase_options.dart';
 import 'presentation/routes/app_routes.dart';
 
